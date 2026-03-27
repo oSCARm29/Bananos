@@ -18,6 +18,9 @@ const client = new Client({
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const BASE44_ENDPOINT = process.env.BASE44_ENDPOINT;
 
+// ID del owner — único que puede dar órdenes de acción
+const OWNER_ID = '479099285707816962';
+
 const channelHistory = {};
 
 client.once('ready', () => {
@@ -30,10 +33,11 @@ client.on('messageCreate', async (message) => {
   const isMentioned = message.mentions.has(client.user);
   const isDM = message.channel.type === 1;
   const containsBananon = message.content.toLowerCase().includes('bananon');
+  const isOwner = message.author.id === OWNER_ID;
 
   const channelId = message.channel.id;
   if (!channelHistory[channelId]) channelHistory[channelId] = [];
-  
+
   channelHistory[channelId].push({
     user: message.author.username,
     content: message.content,
@@ -49,7 +53,7 @@ client.on('messageCreate', async (message) => {
   let content = message.content.replace(/<@!?\d+>/g, '').trim();
   if (!content) content = '(sin texto)';
 
-  console.log(`📨 Mensaje de ${message.author.username}: ${content}`);
+  console.log(`📨 Mensaje de ${message.author.username} (owner: ${isOwner}): ${content}`);
 
   try {
     await message.channel.sendTyping();
@@ -61,6 +65,7 @@ client.on('messageCreate', async (message) => {
         context: {
           discord_user: message.author.username,
           discord_user_id: message.author.id,
+          is_owner: isOwner,
           channel: message.channel.name || 'DM',
           guild: message.guild?.name || 'DM',
           recent_messages: channelHistory[channelId].slice(-20),
@@ -73,6 +78,16 @@ client.on('messageCreate', async (message) => {
     );
 
     const reply = response.data?.reply || 'No pude procesar tu mensaje.';
+
+    // Si no es el owner e intenta dar órdenes de acción, bloqueamos
+    if (!isOwner) {
+      const blockedKeywords = ['banea', 'kickea', 'elimina', 'borra', 'silencia', 'ban', 'kick', 'delete', 'purge'];
+      const isBlocked = blockedKeywords.some(k => content.toLowerCase().includes(k));
+      if (isBlocked) {
+        await message.reply('Solo el dueño del servidor puede darme ese tipo de órdenes. 🍌');
+        return;
+      }
+    }
 
     if (reply.length > 2000) {
       const chunks = reply.match(/.{1,2000}/gs);
