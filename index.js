@@ -1,8 +1,7 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const axios = require('axios');
 const http = require('http');
 
-// Servidor HTTP para que Railway no mate el proceso
 http.createServer((req, res) => res.end('Bananon bot activo 🍌')).listen(process.env.PORT || 3000);
 
 const client = new Client({
@@ -11,35 +10,49 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.GuildMembers,
   ],
+  partials: [Partials.Channel],
 });
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const BASE44_ENDPOINT = process.env.BASE44_ENDPOINT;
+
+const channelHistory = {};
 
 client.once('ready', () => {
   console.log(`✅ Bot conectado como ${client.user.tag}`);
 });
 
 client.on('messageCreate', async (message) => {
-  // Ignorar mensajes del bot mismo
   if (message.author.bot) return;
 
   const isMentioned = message.mentions.has(client.user);
   const isDM = message.channel.type === 1;
   const containsBananon = message.content.toLowerCase().includes('bananon');
 
-  // Responder si mencionan al bot, es DM, o dicen "bananon"
+  const channelId = message.channel.id;
+  if (!channelHistory[channelId]) channelHistory[channelId] = [];
+  
+  channelHistory[channelId].push({
+    user: message.author.username,
+    content: message.content,
+    timestamp: new Date().toISOString(),
+  });
+
+  if (channelHistory[channelId].length > 50) {
+    channelHistory[channelId].shift();
+  }
+
   if (!isMentioned && !isDM && !containsBananon) return;
 
-  // Limpiar el mensaje (quitar la mención y la palabra "bananon" si aplica)
   let content = message.content.replace(/<@!?\d+>/g, '').trim();
-  if (!content) return;
+  if (!content) content = '(sin texto)';
 
   console.log(`📨 Mensaje de ${message.author.username}: ${content}`);
 
   try {
-    message.channel.sendTyping();
+    await message.channel.sendTyping();
 
     const response = await axios.post(
       BASE44_ENDPOINT,
@@ -50,6 +63,7 @@ client.on('messageCreate', async (message) => {
           discord_user_id: message.author.id,
           channel: message.channel.name || 'DM',
           guild: message.guild?.name || 'DM',
+          recent_messages: channelHistory[channelId].slice(-20),
         },
       },
       {
