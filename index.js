@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
 const http = require('http');
 
-// Servidor HTTP para que Koyeb no mate el proceso
+// Servidor HTTP para que Railway no mate el proceso
 http.createServer((req, res) => res.end('Bananon bot activo 🍌')).listen(process.env.PORT || 3000);
 
 const client = new Client({
@@ -15,7 +15,7 @@ const client = new Client({
 });
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const BASE44_APP_ID = '69acab7d598308711cde8720';
+const BASE44_ENDPOINT = process.env.BASE44_ENDPOINT || 'https://bananon-1cde8720.base44.app/functions/discordMessage';
 const BASE44_SERVICE_TOKEN = process.env.BASE44_SERVICE_TOKEN;
 
 client.once('ready', () => {
@@ -38,7 +38,7 @@ client.on('messageCreate', async (message) => {
 
   try {
     const response = await axios.post(
-      `https://api.base44.com/api/apps/${BASE44_APP_ID}/agent/message`,
+      BASE44_ENDPOINT,
       {
         message: content,
         context: {
@@ -56,7 +56,7 @@ client.on('messageCreate', async (message) => {
       }
     );
 
-    const reply = response.data?.message || response.data?.response || 'No pude procesar tu mensaje.';
+    const reply = response.data?.reply || 'No pude procesar tu mensaje.';
 
     if (reply.length > 2000) {
       const chunks = reply.match(/.{1,2000}/gs);
