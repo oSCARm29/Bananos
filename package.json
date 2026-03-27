@@ -1,0 +1,10 @@
+{
+  "name": "bananon-discord-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "discord.js": "^14.0.0",
+    "axios": "^1.6.0"
+  }
+}
