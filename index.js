@@ -56,16 +56,16 @@ const TICKET_KEYWORDS = {
   'staff': 'Reporte 📋',
   'streamer': 'Rol Streamer 🎥',
   'stream': 'Rol Streamer 🎥',
-  'soporte': 'Soporte General 🆘',
-  'ayuda': 'Soporte General 🆘',
-  'help': 'Soporte General 🆘',
-  'realtor': 'Realtor 🏠',
-  'casa': 'Realtor 🏠',
-  'diseño': 'Diseño 🎨',
-  'design': 'Diseño 🎨',
-  'programacion': 'Programación 💻',
-  'programación': 'Programación 💻',
-  'script': 'Programación 💻',
+  'soporte': 'Soporte General',
+  'ayuda': 'Soporte General',
+  'help': 'Soporte General',
+  'realtor': 'Realtor',
+  'casa': 'Realtor',
+  'diseño': 'Diseño',
+  'design': 'Diseño',
+  'programacion': 'Programación',
+  'programación': 'Programación',
+  'script': 'Programación',
 };
 
 // Canales donde hay tickets (nombres que contengan "ticket")
@@ -80,7 +80,7 @@ function detectTicketCategory(text) {
   for (const [keyword, category] of Object.entries(TICKET_KEYWORDS)) {
     if (lower.includes(keyword)) return category;
   }
-  return 'Soporte General 🆘';
+  return 'Soporte General';
 }
 
 // ============================================================
@@ -232,7 +232,9 @@ client.on('messageCreate', async (message) => {
 
     if (!activeTickets.has(channelId)) {
       // Primer mensaje en este ticket — registrar y notificar staff
-      const category = detectTicketCategory(message.content);
+      // Usar nombre de la categoría del canal directamente
+      const rawCategoryName = message.channel.parent?.name || '';
+      const category = normalizeUnicode(rawCategoryName) || detectTicketCategory(message.content);
 
       activeTickets.set(channelId, {
         userId: message.author.id,
