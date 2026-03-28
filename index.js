@@ -366,6 +366,7 @@ client.on('messageCreate', async (message) => {
           mentioned_channels: mentionedChannels,
           recent_channel_messages: recentMessages,
           in_ticket: inTicket,
+          ticket_category: inTicket ? (activeTickets.get(currentChannelId)?.category || normalizeUnicode(message.channel.parent?.name || '')) : null,
         },
       },
       { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
