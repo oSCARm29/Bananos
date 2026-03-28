@@ -201,6 +201,12 @@ client.on('messageCreate', async (message) => {
   const isDM = message.channel.type === 1;
   const containsBananon = message.content.toLowerCase().includes('bananon');
   const inTicket = !isDM && isTicketChannel(message.channel);
+  
+  // DEBUG
+  if (!isDM) {
+    const parentName = message.channel.parent?.name || 'sin categoria';
+    console.log(`📌 Canal: ${message.channel.name} | Categoría: ${parentName} | isTicket: ${inTicket}`);
+  }
 
   // ---- LÓGICA DE TICKETS ----
   if (inTicket) {
