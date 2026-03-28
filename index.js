@@ -302,12 +302,13 @@ client.on('messageCreate', async (message) => {
       }
     }
 
-    // Si el mensaje no menciona al bot ni contiene "bananon", no hacer nada más
-    if (!isMentioned && !containsBananon) return;
+    // En tickets siempre responde con IA (no necesita mención)
+    // Solo saltar si no hay contenido útil
   }
 
   // ---- LÓGICA NORMAL DEL BOT ----
-  if (!isMentioned && !isDM && !containsBananon) return;
+  // Fuera de tickets, solo responde si lo mencionan o dicen "bananon"
+  if (!inTicket && !isMentioned && !isDM && !containsBananon) return;
 
   let content = message.content.replace(/<@!?\d+>/g, '').trim();
   if (!content) return;
