@@ -295,17 +295,25 @@ client.on('messageCreate', async (message) => {
       }, TICKET_REMINDER_MS);
 
     } else {
-      // Mensajes subsiguientes — si un staff responde, marcar ticket como atendido
+      // Mensajes subsiguientes — verificar si es staff
       const ticket = activeTickets.get(channelId);
-      if (ticket && message.author.id !== ticket.userId) {
-        // Un staff u otra persona respondió — limpiar el ticket
-        activeTickets.delete(channelId);
-        console.log(`✅ Ticket ${channelId} atendido por ${message.author.username}`);
+      const STAFF_ROLE_ID = '1311712873072037919';
+      const isStaff = message.member?.roles.cache.has(STAFF_ROLE_ID);
+
+      if (ticket && isStaff) {
+        // Staff respondió — marcar ticket como atendido y ya no responder
+        ticket.staffTookOver = true;
+        activeTickets.set(channelId, ticket);
+        console.log(`✅ Staff ${message.author.username} tomó el ticket ${channelId} — bot se retira`);
+        return; // No responder nada
       }
     }
 
+    // Si el staff ya tomó el ticket, no hacer nada
+    const ticketData = activeTickets.get(channelId);
+    if (ticketData?.staffTookOver) return;
+
     // En tickets siempre responde con IA (no necesita mención)
-    // Solo saltar si no hay contenido útil
   }
 
   // ---- LÓGICA NORMAL DEL BOT ----
