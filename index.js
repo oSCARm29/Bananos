@@ -123,8 +123,12 @@ async function notifyStaff(guild, ticketChannel, userId, username, firstMessage,
 // FUNCIÓN: verificar si un canal es un ticket
 // ============================================================
 function isTicketChannel(channel) {
+  // Detectar por categoría padre del canal (Ticket Tool crea canales con nombre de usuario)
+  const parentName = (channel.parent?.name || '').toLowerCase();
+  if (parentName.includes('ticket')) return true;
+  // Fallback: nombre del canal contiene ticket
   const name = (channel.name || '').toLowerCase();
-  return name.includes('ticket') || name.startsWith('🎫') || name.startsWith('ticket');
+  return name.includes('ticket') || name.startsWith('🎫');
 }
 
 // ============================================================
