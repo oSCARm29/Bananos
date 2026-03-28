@@ -247,7 +247,7 @@ client.on('messageCreate', async (message) => {
 
       // Responder al usuario
       await message.channel.send(
-        `Hola <@${message.author.id}> 👋🍌\n\nTu ticket ha sido recibido en la categoría **${category}**.\nUn miembro del **staff real** te va a atender en breve — no eres un bot, vas a hablar con una persona 🙌\n\nMientras tanto, explica tu situación con el mayor detalle posible.`
+        `Hola <@${message.author.id}> 👋🍌\n\nTu ticket ha sido recibido en la categoría **${category}**.\nUn miembro del staff te va a atender en breve.\n\nMientras tanto, explica tu situación con el mayor detalle posible.`
       );
 
       // Notificar al staff
