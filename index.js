@@ -122,12 +122,28 @@ async function notifyStaff(guild, ticketChannel, userId, username, firstMessage,
 // ============================================================
 // FUNCIÓN: verificar si un canal es un ticket
 // ============================================================
+function normalizeUnicode(str) {
+  // Convierte letras unicode matematicas (bold, italic, etc.) a ASCII normal
+  let result = '';
+  for (const c of str) {
+    const code = c.codePointAt(0);
+    // Rango de letras matematicas unicode bold/italic
+    if (code >= 0x1D400 && code <= 0x1D7FF) {
+      const offset = code - 0x1D400;
+      const bases = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const idx = offset % 52;
+      result += bases[idx] || '';
+    } else if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c === ' ') {
+      result += c;
+    }
+  }
+  return result.toLowerCase().trim();
+}
+
 function isTicketChannel(channel) {
-  // Detectar por categoría padre del canal (Ticket Tool usa emojis y letras especiales)
-  const parentName = (channel.parent?.name || '');
-  // Normalizar: quitar emojis y caracteres especiales, convertir a minúsculas
-  const parentNorm = parentName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9\s]/g, '').toLowerCase();
-  if (parentNorm.includes('ticket')) return true;
+  // Detectar por categoría padre del canal (Ticket Tool usa emojis y letras unicode bold)
+  const parentName = normalizeUnicode(channel.parent?.name || '');
+  if (parentName.includes('ticket')) return true;
   // Fallback: nombre del canal
   const name = (channel.name || '').toLowerCase();
   return name.includes('ticket') || name.startsWith('🎫');
